@@ -8,11 +8,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.text433.cardoctorai"
+        applicationId = "com.cardoctorai.mobile"
         minSdk = 21
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.1.2"
     }
 
     buildTypes {
