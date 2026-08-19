@@ -7,6 +7,9 @@ on:
     paths-ignore:
       - "downloads/**"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,21 +21,34 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
 
       - name: Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android build tools
-        run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Bootstrap Gradle 8.7 only if wrapper JAR is missing
+        if: ${{ hashFiles('gradle/wrapper/gradle-wrapper.jar') == '' }}
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
 
-      - name: Bootstrap Gradle wrapper jar
+      - name: Generate and commit full Gradle wrapper once
+        if: ${{ hashFiles('gradle/wrapper/gradle-wrapper.jar') == '' }}
         run: |
           gradle wrapper --gradle-version 8.7
           chmod +x gradlew
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add gradlew gradlew.bat gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties
+          if ! git diff --cached --quiet; then
+            git commit -m "Commit complete Gradle wrapper [skip ci]"
+            git push
+          fi
 
-      - name: Build with project Gradle wrapper
+      - name: Ensure wrapper executable
+        run: chmod +x gradlew
+
+      - name: Build debug APK
         run: ./gradlew --no-daemon clean :app:assembleDebug
 
       - name: Validate APK
@@ -40,11 +56,10 @@ jobs:
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -s "$APK"
           unzip -t "$APK" >/dev/null
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$APK"
           cp "$APK" CarDoctorAI.apk
 
-      - name: Upload installable APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: CarDoctorAI-APK
