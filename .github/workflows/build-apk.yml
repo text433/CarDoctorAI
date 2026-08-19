@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths-ignore:
-      - "downloads/**"
 
 permissions:
   contents: write
@@ -25,25 +23,6 @@ jobs:
 
       - name: Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Bootstrap Gradle 8.7 only if wrapper JAR is missing
-        if: ${{ hashFiles('gradle/wrapper/gradle-wrapper.jar') == '' }}
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.7"
-
-      - name: Generate and commit full Gradle wrapper once
-        if: ${{ hashFiles('gradle/wrapper/gradle-wrapper.jar') == '' }}
-        run: |
-          gradle wrapper --gradle-version 8.7
-          chmod +x gradlew
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add gradlew gradlew.bat gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties
-          if ! git diff --cached --quiet; then
-            git commit -m "Commit complete Gradle wrapper [skip ci]"
-            git push
-          fi
 
       - name: Ensure wrapper executable
         run: chmod +x gradlew
@@ -65,3 +44,10 @@ jobs:
           name: CarDoctorAI-APK
           path: CarDoctorAI.apk
           if-no-files-found: error
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: CarDoctor AI build ${{ github.run_number }}
+          files: CarDoctorAI.apk
