@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:allowBackup="false"
-        android:label="APK Install Test"
+        android:label="CarDoctor AI"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.cardoctor.ai.InstallTestActivity"
+            android:name="com.cardoctor.ai.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
