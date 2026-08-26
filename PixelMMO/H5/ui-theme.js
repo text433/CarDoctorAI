@@ -1,74 +1,14 @@
-const PIXELMMO_VERSION='v0.8.1-alpha';
+const PIXELMMO_VERSION='v0.9.0-alpha';
 let uiThemeBuilt=false,uiLayer=[],armLayer=null,uiVersion=null,uiName=null,uiHpFill=null,uiXpFill=null,uiStatsText=null,uiZoneText=null;
-const oldStartGame=startGame;
-startGame=function(s,c){oldStartGame(s,c);buildFantasyUI(s);};
-
-function panel(s,x,y,w,h,fill=0x0a0d0a,stroke=0x8b6b32,depth=37){
-  const bg=s.add.rectangle(x,y,w,h,fill,.92).setStrokeStyle(2,stroke,.95).setDepth(depth);
-  const inner=s.add.rectangle(x,y,w-8,h-8,0x151b13,.45).setStrokeStyle(1,0x3b2d18,.9).setDepth(depth+.1);
-  uiLayer.push(bg,inner);return bg;
-}
-function buildFantasyUI(s){
-  if(uiThemeBuilt)return;uiThemeBuilt=true;
-  if(hud)hud.setVisible(false);if(statsBtn)statsBtn.setVisible(false);if(invBtn)invBtn.setVisible(false);
-  panel(s,155,56,286,82,0x080b08,0x9e7a3c,37);
-  const portrait=s.add.circle(50,56,28,classes[playerClass].color).setStrokeStyle(4,0x9e7a3c).setDepth(39);
-  const crest=s.add.text(50,56,playerClass==='Warrior'?'⚔':playerClass==='Wizard'?'✦':'➶',{fontFamily:'serif',fontSize:'24px',color:'#f2d48b'}).setOrigin(.5).setDepth(40);
-  uiName=s.add.text(88,27,`${playerClass.toUpperCase()}  •  LV ${level}`,{fontFamily:'monospace',fontSize:'15px',color:'#f0d28a'}).setDepth(40);
-  s.add.rectangle(178,51,166,13,0x25090a,.95).setStrokeStyle(1,0x5c381e).setDepth(39);
-  uiHpFill=s.add.rectangle(95,51,166,11,0xb43635).setOrigin(0,.5).setDepth(40);
-  s.add.rectangle(178,69,166,9,0x0b1830,.95).setStrokeStyle(1,0x5c381e).setDepth(39);
-  uiXpFill=s.add.rectangle(95,69,166,7,0x3d6fbe).setOrigin(0,.5).setDepth(40);
-  uiStatsText=s.add.text(272,43,'',{fontFamily:'monospace',fontSize:'10px',color:'#c9b98c',align:'right'}).setOrigin(1,0).setDepth(40);
-  uiLayer.push(portrait,crest,uiName,uiHpFill,uiXpFill,uiStatsText);
-
-  panel(s,868,91,154,154,0x070a08,0x9e7a3c,34);
-  const radarTitle=s.add.text(868,20,'WORLD RADAR',{fontFamily:'monospace',fontSize:'10px',color:'#d5bc79'}).setOrigin(.5).setDepth(38);
-  const legend=s.add.text(868,154,'● enemy   ◆ boss   ✦ loot',{fontFamily:'monospace',fontSize:'8px',color:'#a99870'}).setOrigin(.5).setDepth(38);
-  uiLayer.push(radarTitle,legend);
-
-  panel(s,480,506,390,58,0x080b08,0x9e7a3c,37);
-  const barLabel=s.add.text(480,478,'AUTO SKILLS',{fontFamily:'monospace',fontSize:'9px',color:'#d8c28a'}).setOrigin(.5).setDepth(39);
-  uiLayer.push(barLabel);
-
-  const statsButton=s.add.text(765,205,'CHARACTER',{fontFamily:'monospace',fontSize:'12px',color:'#f0d28a',backgroundColor:'#2a2115',padding:{x:10,y:7}}).setStroke('#80602f',1).setDepth(44).setInteractive();
-  const invButton=s.add.text(765,244,'INVENTORY',{fontFamily:'monospace',fontSize:'12px',color:'#dce5c7',backgroundColor:'#172018',padding:{x:10,y:7}}).setStroke('#52623e',1).setDepth(44).setInteractive();
-  statsButton.on('pointerdown',()=>toggleStats(s));invButton.on('pointerdown',()=>toggleInventory(s));uiLayer.push(statsButton,invButton);
-
-  uiVersion=s.add.text(16,514,PIXELMMO_VERSION,{fontFamily:'monospace',fontSize:'10px',color:'#806f4f'}).setDepth(44);
-  uiZoneText=s.add.text(480,18,'',{fontFamily:'monospace',fontSize:'11px',color:'#d4bd7b',backgroundColor:'#0a0d09cc',padding:{x:8,y:4}}).setOrigin(.5).setDepth(44);
-  uiLayer.push(uiVersion,uiZoneText);
-
-  drawCharacterArms(s);
-  s.events.on('update',updateFantasyUI);
-}
-
-function drawCharacterArms(s){
-  armLayer=s.add.graphics().setDepth(10.5);uiLayer.push(armLayer);
-}
-function updateFantasyUI(){
-  if(!uiThemeBuilt||!gameStarted)return;
-  const hpPct=Math.max(0,Math.min(1,hp/maxHp));
-  const xpPct=Math.max(0,Math.min(1,xp/(level*100)));
-  if(uiHpFill)uiHpFill.displayWidth=166*hpPct;
-  if(uiXpFill)uiXpFill.displayWidth=166*xpPct;
-  if(uiName)uiName.setText(`${playerClass.toUpperCase()}  •  LV ${level}`);
-  if(uiStatsText)uiStatsText.setText(`HP ${Math.ceil(hp)}/${maxHp}\nPWR ${totalPower()}  PTS ${points}`);
-  if(uiZoneText)uiZoneText.setText(`ZONE ${currentZone()}   •   DIST ${Math.floor(totalDistance)}`);
-  updateArms();
-}
-function updateArms(){
-  if(!armLayer)return;armLayer.clear();
-  const a=facing.angle(),fx=Math.cos(a),fy=Math.sin(a),px=-fy,py=fx;
-  const shoulder=13,handForward=18,handSide=8;
-  const skin=0xc69262,glove=playerClass==='Warrior'?0x5b4732:playerClass==='Wizard'?0x42516c:0x4b5d38;
-  const sx1=480+px*shoulder,sy1=270+py*shoulder,sx2=480-px*shoulder,sy2=270-py*shoulder;
-  const hx1=480+fx*handForward+px*handSide,hy1=270+fy*handForward+py*handSide;
-  const hx2=480+fx*(handForward+2)-px*handSide,hy2=270+fy*(handForward+2)-py*handSide;
-  armLayer.lineStyle(8,glove,1);armLayer.lineBetween(sx1,sy1,hx1,hy1);armLayer.lineBetween(sx2,sy2,hx2,hy2);
-  armLayer.fillStyle(skin,1);armLayer.fillCircle(hx1,hy1,5);armLayer.fillCircle(hx2,hy2,5);
-  armLayer.lineStyle(2,0x24180f,.9);armLayer.strokeCircle(hx1,hy1,5);armLayer.strokeCircle(hx2,hy2,5);
-  if(playerClass==='Archer'){
-    armLayer.lineStyle(2,0xe6d3a6,.85);armLayer.lineBetween(hx1,hy1,hx2,hy2);
-  }
-}
+const oldStartGame=startGame; startGame=function(s,c){oldStartGame(s,c);buildFantasyUI(s)};
+function metalPanel(s,x,y,w,h,d=37){let g=s.add.graphics().setDepth(d);g.fillStyle(0x050706,.94).fillRoundedRect(x-w/2,y-h/2,w,h,10);g.lineStyle(5,0x21170d,1).strokeRoundedRect(x-w/2,y-h/2,w,h,10);g.lineStyle(2,0xa77b37,.95).strokeRoundedRect(x-w/2+4,y-h/2+4,w-8,h-8,8);g.lineStyle(1,0x4d3519,.9).strokeRoundedRect(x-w/2+9,y-h/2+9,w-18,h-18,6);[[x-w/2+7,y-h/2+7],[x+w/2-7,y-h/2+7],[x-w/2+7,y+h/2-7],[x+w/2-7,y+h/2-7]].forEach(p=>{g.fillStyle(0xc09245).fillCircle(p[0],p[1],3);g.fillStyle(0x35210e).fillCircle(p[0],p[1],1)});uiLayer.push(g);return g}
+function runeButton(s,x,y,r,label,col=0xb88b45){let g=s.add.graphics().setDepth(41);g.fillStyle(0x080a08,.95).fillCircle(x,y,r);g.lineStyle(5,0x26180c).strokeCircle(x,y,r);g.lineStyle(2,col).strokeCircle(x,y,r-3);g.lineStyle(1,0x5c3d1b).strokeCircle(x,y,r-8);for(let a=0;a<6;a++){let q=a*Math.PI/3;g.fillStyle(col,.8).fillTriangle(x+Math.cos(q)*(r-4),y+Math.sin(q)*(r-4),x+Math.cos(q-.1)*(r-10),y+Math.sin(q-.1)*(r-10),x+Math.cos(q+.1)*(r-10),y+Math.sin(q+.1)*(r-10))}let t=s.add.text(x,y,label,{fontFamily:'Georgia',fontSize:'11px',fontStyle:'bold',color:'#ead29a',align:'center'}).setOrigin(.5).setDepth(43);uiLayer.push(g,t);return t}
+function buildFantasyUI(s){if(uiThemeBuilt)return;uiThemeBuilt=true;if(hud)hud.setVisible(false);if(statsBtn)statsBtn.setVisible(false);if(invBtn)invBtn.setVisible(false);
+metalPanel(s,171,59,322,96);let crest=s.add.graphics().setDepth(40);crest.fillStyle(0x090b09).fillCircle(53,59,35);crest.lineStyle(6,0x25180c).strokeCircle(53,59,35);crest.lineStyle(3,0xb28743).strokeCircle(53,59,31);crest.lineStyle(1,0xe0bc69,.6).strokeCircle(53,59,26);let sym=s.add.text(53,59,playerClass==='Warrior'?'⚔':playerClass==='Wizard'?'✦':'➶',{fontFamily:'serif',fontSize:'27px',color:'#e2bd69'}).setOrigin(.5).setDepth(42);uiName=s.add.text(94,22,`${playerClass.toUpperCase()}  LV ${level}`,{fontFamily:'Georgia',fontSize:'16px',fontStyle:'bold',color:'#e5c477'}).setDepth(42);s.add.rectangle(192,49,190,15,0x180506).setStrokeStyle(2,0x6d4821).setDepth(39);uiHpFill=s.add.rectangle(97,49,190,11,0xa82327).setOrigin(0,.5).setDepth(40);s.add.rectangle(192,70,190,11,0x061021).setStrokeStyle(2,0x6d4821).setDepth(39);uiXpFill=s.add.rectangle(97,70,190,7,0x315fa8).setOrigin(0,.5).setDepth(40);uiStatsText=s.add.text(290,38,'',{fontFamily:'monospace',fontSize:'9px',color:'#c7b282',align:'right'}).setOrigin(1,0).setDepth(42);uiLayer.push(crest,sym,uiName,uiHpFill,uiXpFill,uiStatsText);
+metalPanel(s,871,91,168,168,34);let rg=s.add.graphics().setDepth(36);rg.lineStyle(1,0x70552a,.55);rg.strokeCircle(875,90,57);rg.strokeCircle(875,90,42);for(let a=0;a<8;a++){let q=a*Math.PI/4;rg.lineBetween(875+Math.cos(q)*49,90+Math.sin(q)*49,875+Math.cos(q)*58,90+Math.sin(q)*58)}uiLayer.push(rg,s.add.text(871,14,'✦ WORLD RADAR ✦',{fontFamily:'Georgia',fontSize:'11px',color:'#d6b666'}).setOrigin(.5).setDepth(39));
+metalPanel(s,480,501,430,70,37);s.add.text(480,469,'— AUTO COMBAT SKILLS —',{fontFamily:'Georgia',fontSize:'10px',color:'#b99655'}).setOrigin(.5).setDepth(42);runeButton(s,654,500,28,'I');runeButton(s,724,500,28,'II',0x6f8e9c);runeButton(s,794,500,28,'III',0x76577e);
+let cb=runeButton(s,876,317,35,'CHAR');let ib=runeButton(s,876,398,35,'BAG',0x6d8255);cb.setInteractive({useHandCursor:true}).on('pointerdown',()=>toggleStats(s));ib.setInteractive({useHandCursor:true}).on('pointerdown',()=>toggleInventory(s));
+metalPanel(s,105,435,145,145,36);let joyDecor=s.add.graphics().setDepth(39);joyDecor.lineStyle(2,0x8d6831,.8).strokeCircle(105,435,61);joyDecor.lineStyle(1,0x49341b,.8).strokeCircle(105,435,49);uiLayer.push(joyDecor);
+uiVersion=s.add.text(16,515,PIXELMMO_VERSION,{fontFamily:'Georgia',fontSize:'10px',color:'#9e7c43'}).setDepth(44);uiZoneText=s.add.text(480,17,'',{fontFamily:'Georgia',fontSize:'11px',color:'#d5b76e',backgroundColor:'#080a08dd',padding:{x:12,y:5}}).setOrigin(.5).setDepth(44);uiLayer.push(uiVersion,uiZoneText);armLayer=s.add.graphics().setDepth(10.5);s.events.on('update',updateFantasyUI)}
+function updateFantasyUI(){if(!uiThemeBuilt||!gameStarted)return;uiHpFill.displayWidth=190*Math.max(0,Math.min(1,hp/maxHp));uiXpFill.displayWidth=190*Math.max(0,Math.min(1,xp/(level*100)));uiName.setText(`${playerClass.toUpperCase()}  LV ${level}`);uiStatsText.setText(`HP ${Math.ceil(hp)}/${maxHp}\nPWR ${totalPower()}  PTS ${points}`);uiZoneText.setText(`ZONE ${currentZone()}   •   DIST ${Math.floor(totalDistance)}`);updateArms()}
+function updateArms(){if(!armLayer)return;armLayer.clear();let a=facing.angle(),fx=Math.cos(a),fy=Math.sin(a),px=-fy,py=fx,glove=playerClass==='Warrior'?0x493724:playerClass==='Wizard'?0x34415c:0x39482d;let s1={x:480+px*12,y:270+py*12},s2={x:480-px*12,y:270-py*12},h1={x:480+fx*20+px*7,y:270+fy*20+py*7},h2={x:480+fx*22-px*7,y:270+fy*22-py*7};armLayer.lineStyle(11,0x20160f).lineBetween(s1.x,s1.y,h1.x,h1.y).lineBetween(s2.x,s2.y,h2.x,h2.y);armLayer.lineStyle(7,glove).lineBetween(s1.x,s1.y,h1.x,h1.y).lineBetween(s2.x,s2.y,h2.x,h2.y);armLayer.fillStyle(0xb97e52).fillCircle(h1.x,h1.y,5).fillCircle(h2.x,h2.y,5);armLayer.lineStyle(2,0x24150d).strokeCircle(h1.x,h1.y,5).strokeCircle(h2.x,h2.y,5)}
