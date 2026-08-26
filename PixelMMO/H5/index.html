@@ -3,10 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>PixelMMO</title>
-  <style>html,body{margin:0;background:#090b10;overflow:hidden}canvas{display:block;margin:auto;image-rendering:pixelated}</style>
+  <title>PixelMMO GPS</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#090b10;overflow:hidden}
+    #worldMap{position:fixed;inset:0;z-index:0;filter:saturate(.55) brightness(.55)}
+    canvas{position:fixed!important;inset:0;z-index:10;display:block;margin:auto;image-rendering:pixelated;background:transparent!important}
+    .leaflet-control-zoom{display:none}.leaflet-control-attribution{font-size:9px;opacity:.7}
+    #gpsStatus{position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:30;background:#111c;color:#f3d27a;border:1px solid #8b6b32;border-radius:8px;padding:7px 12px;font:12px monospace;pointer-events:none}
+  </style>
 </head>
 <body>
+<div id="worldMap"></div><div id="gpsStatus">Finding GPS location...</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  window.pixelMap=L.map('worldMap',{zoomControl:false,dragging:false,doubleClickZoom:false,scrollWheelZoom:false,touchZoom:false,keyboard:false}).setView([56.9496,24.1052],17);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(window.pixelMap);
+  window.pixelGeo={lat:56.9496,lng:24.1052,ready:false};
+  const status=document.getElementById('gpsStatus');
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{window.pixelGeo={lat:p.coords.latitude,lng:p.coords.longitude,ready:true};window.pixelMap.setView([p.coords.latitude,p.coords.longitude],17);status.textContent='GPS map ready • move with joystick';setTimeout(()=>status.style.display='none',3500);},e=>{status.textContent='GPS unavailable • demo map loaded';setTimeout(()=>status.style.display='none',3500);},{enableHighAccuracy:true,timeout:10000,maximumAge:30000});}else status.textContent='GPS unsupported • demo map loaded';
+  window.movePixelMap=function(dx,dy){if(!window.pixelMap)return;window.pixelMap.panBy([dx,dy],{animate:false});};
+</script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
 <script src="game.js"></script>
 </body>
