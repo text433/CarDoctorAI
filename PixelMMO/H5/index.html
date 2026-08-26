@@ -1,36 +1,9 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>PixelMMO Fantasy GPS</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>
-html,body{margin:0;width:100%;height:100%;background:#11170f;overflow:hidden;touch-action:none}
-#worldMap{position:fixed;inset:0;z-index:0;background:#26311d}
-/* Turn the real OSM map into a muted dark-fantasy game board while keeping roads/buildings readable. */
-.leaflet-tile-pane{filter:sepia(.72) saturate(.72) hue-rotate(345deg) brightness(.48) contrast(1.42)}
-#fantasyTint{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at 50% 48%,rgba(92,113,55,.04) 0 25%,rgba(25,34,18,.18) 68%,rgba(5,8,5,.5) 100%);box-shadow:inset 0 0 110px rgba(0,0,0,.72)}
-#texture{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.13;background-image:linear-gradient(45deg,rgba(255,220,145,.12) 25%,transparent 25%),linear-gradient(-45deg,rgba(0,0,0,.18) 25%,transparent 25%);background-size:4px 4px;mix-blend-mode:overlay}
-canvas{position:fixed!important;inset:0;z-index:10;display:block;margin:auto;image-rendering:pixelated;background:transparent!important;touch-action:none}
-.leaflet-control-zoom{display:none}.leaflet-control-attribution{font:8px monospace;background:#090b08bb!important;color:#bca878!important}.leaflet-control-attribution a{color:#d5bd80!important}
-#gpsStatus{position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:30;background:#11170ee8;color:#f3d27a;border:1px solid #8b6b32;border-radius:8px;padding:7px 12px;font:12px monospace;pointer-events:none}
-#mapBadge{position:fixed;right:9px;bottom:8px;z-index:9;color:#b9a36c;background:#11170ebb;border:1px solid #5e512f;padding:4px 7px;border-radius:5px;font:9px monospace;pointer-events:none}
-</style>
-</head>
-<body>
-<div id="worldMap"></div><div id="fantasyTint"></div><div id="texture"></div><div id="gpsStatus">Finding GPS location...</div><div id="mapBadge">REAL WORLD • FANTASY LAYER</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-window.pixelMap=L.map('worldMap',{zoomControl:false,dragging:false,doubleClickZoom:false,scrollWheelZoom:false,touchZoom:false,keyboard:false,zoomSnap:1}).setView([56.9496,24.1052],18);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,minZoom:15,attribution:'© OpenStreetMap contributors'}).addTo(window.pixelMap);
-window.pixelGeo={lat:56.9496,lng:24.1052,ready:false};
-const status=document.getElementById('gpsStatus');
-function gpsReady(lat,lng){window.pixelGeo={lat,lng,ready:true};window.pixelMap.setView([lat,lng],18);status.textContent='FANTASY WORLD READY • JOYSTICK TO MOVE';setTimeout(()=>status.style.display='none',3000)}
-if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>gpsReady(p.coords.latitude,p.coords.longitude),()=>{status.textContent='GPS unavailable • Riga demo world';setTimeout(()=>status.style.display='none',3000)},{enableHighAccuracy:true,timeout:10000,maximumAge:30000})}else status.textContent='GPS unsupported • Riga demo world';
-window.movePixelMap=function(dx,dy){if(window.pixelMap)window.pixelMap.panBy([dx,dy],{animate:false})};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-<script src="game.js"></script>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>PixelMMO Fantasy GPS</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
+html,body{margin:0;width:100%;height:100%;background:#11170f;overflow:hidden;touch-action:none}#worldMap{position:fixed;inset:0;z-index:0;background:#26311d}.leaflet-tile-pane{filter:sepia(.8) saturate(.55) brightness(.38) contrast(1.5)}#fantasyTint{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle,rgba(76,101,45,.04),rgba(6,10,5,.48));box-shadow:inset 0 0 120px #000b}canvas{position:fixed!important;inset:0;z-index:10;display:block;margin:auto;image-rendering:pixelated;background:transparent!important;touch-action:none}.leaflet-control-zoom{display:none}.leaflet-control-attribution{font:8px monospace;background:#090b08bb!important;color:#bca878!important}.leaflet-control-attribution a{color:#d5bd80!important}#gpsStatus{position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:30;background:#111e;color:#f3d27a;border:1px solid #8b6b32;border-radius:8px;padding:7px 12px;font:12px monospace;pointer-events:none}.fantasy-house{background:#5a3824;border:2px solid #d09b54;box-shadow:3px 4px 0 #21150d;border-radius:2px;transform:rotate(45deg)}.fantasy-tree{background:#315b2a;border:2px solid #183519;border-radius:50%;box-shadow:3px 4px 0 #132012,inset 4px 4px 0 #4c7a3e}.fantasy-house,.fantasy-tree{pointer-events:none}
+</style></head><body><div id="worldMap"></div><div id="fantasyTint"></div><div id="gpsStatus">Finding GPS location...</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
+window.pixelMap=L.map('worldMap',{zoomControl:false,dragging:false,doubleClickZoom:false,scrollWheelZoom:false,touchZoom:false,keyboard:false}).setView([56.9496,24.1052],18);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,minZoom:15,attribution:'© OpenStreetMap contributors'}).addTo(pixelMap);window.pixelGeo={lat:56.9496,lng:24.1052,ready:false};const status=document.getElementById('gpsStatus'),fantasyLayer=L.layerGroup().addTo(pixelMap);let loadTimer;
+function icon(cls,size){return L.divIcon({className:'',html:`<div class="${cls}" style="width:${size}px;height:${size}px"></div>`,iconSize:[size,size],iconAnchor:[size/2,size/2]})}
+async function loadFantasy(){clearTimeout(loadTimer);loadTimer=setTimeout(async()=>{let c=pixelMap.getCenter(),q=`[out:json][timeout:8];(way[building](around:320,${c.lat},${c.lng});node[natural=tree](around:320,${c.lat},${c.lng}););out center 90;`;try{let r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)),d=await r.json();fantasyLayer.clearLayers();let houses=0,trees=0;for(const e of d.elements){if(e.tags&&e.tags.building&&e.center&&houses<45){L.marker([e.center.lat,e.center.lon],{icon:icon('fantasy-house',Phaser?18:18),interactive:false}).addTo(fantasyLayer);houses++}else if(e.tags&&e.tags.natural==='tree'&&trees<80){L.marker([e.lat,e.lon],{icon:icon('fantasy-tree',14),interactive:false}).addTo(fantasyLayer);trees++}}}catch(e){}},500)}
+function ready(lat,lng){window.pixelGeo={lat,lng,ready:true};pixelMap.setView([lat,lng],18);status.textContent='FANTASY WORLD READY';loadFantasy();setTimeout(()=>status.style.display='none',2500)}if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>ready(p.coords.latitude,p.coords.longitude),()=>ready(56.9496,24.1052),{enableHighAccuracy:true,timeout:10000,maximumAge:30000});else ready(56.9496,24.1052);window.movePixelMap=(dx,dy)=>{pixelMap.panBy([dx,dy],{animate:false});loadFantasy()};
+</script><script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script><script src="game.js"></script></body></html>
